@@ -9,14 +9,10 @@
   stroke: #fff;
   stroke-width: 1.5px;
 }
-.node text {
+.label {
   pointer-events: none;
   font-family: 'Arimo', sans-serif;
-  font-size: 11px;
-}
-
-.label {
-  font: 6px sans-serif;
+  font-size: 6px;
 }
 
 </style>
@@ -1017,6 +1013,9 @@ function connectedNodes() {
             return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
         });
         
+                label.style("opacity", function (o) {
+            return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
+        });
         //Reduce the op
         
         toggle = 1;
@@ -1057,6 +1056,10 @@ function connectedNodes() {
         link.style("opacity", function (o) {
             return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
         });
+
+        labels.style("opacity", function (o) {
+            return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
+        });
         
         //Reduce the op
         
@@ -1065,6 +1068,7 @@ function connectedNodes() {
         //Put them back to opacity=1
         node.style("opacity", 1);
         link.style("opacity", 1);
+        labels.style("opacity", 1);
         toggle = 0;
     }
 
