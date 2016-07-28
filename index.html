@@ -14,12 +14,19 @@
   font-family: 'Arimo', sans-serif;
   font-size: 20px;
 }
+.ui-widget{
+  position:relative;
+}
     #mapid { position:absolute; width:50%; height: 100%;}
 </style>
    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-<svg width="700" height="800" style = "float:right"></svg>
+<svg width="800" height="900" style = "float:right"></svg>
   <div id = 'mapid'></div>
+  <div class="ui-widget" style = "float:right">
+   <input id="search">
+    <button type="button" onclick="searchNode()">Search</button>
+</div>
 <script src="https://d3js.org/d3.v4.min.js"></script>
  <link href='https://fonts.googleapis.com/css?family=Fjalla+One|Exo:400,600|Ropa+Sans' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Arimo|Dosis|Lato' rel='stylesheet' type='text/css'>
@@ -27,10 +34,6 @@
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
-
-    function strength() {
-  return -10000;
-}
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -132,7 +135,7 @@ function highlightFeature(e) {
         fillOpacity: 0.7
     });
    var twoLetters = returnNode(layer.feature.properties);
-   connecteddNodes(twoLetters);
+   connecteddNodes(twoLetters, e);
 }
 
 returnNode = function (props){
@@ -147,9 +150,7 @@ returnNode = function (props){
 
 function onEachFeature(feature, layer) {
     layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight,
-        click: zoomToFeature
+        click: highlightFeature
     });
 }
 
@@ -1244,7 +1245,7 @@ function connectedNodes() {
 
 }
 
-function connecteddNodes(abbrev) {
+function connecteddNodes(abbrev, e) {
 
     if (toggle == 0) {
         //Reduce the opacity of all but the neighbouring nodes
@@ -1253,8 +1254,6 @@ function connecteddNodes(abbrev) {
         console.log(graph.nodes.length);
         for(i = 0; i < graph.nodes.length; i++){
           if(graph.nodes[i].id === abbrev){
-            console.log(abbrev);
-            console.log(graph.nodes[i].id);
             d = d3.select('#' + graph.nodes[i].id).node().__data__;
           }
         }
@@ -1274,8 +1273,51 @@ function connecteddNodes(abbrev) {
         //Reduce the op
         
         toggle = 1;
+        
     } else {
         //Put them back to opacity=1
+        resetHighlight(e);
+        node.style("opacity", 1);
+        link.style("opacity", 1);
+        labels.style("opacity", 0);
+        toggle = 0;
+    }
+
+}
+function searchNode() {
+    //find the node
+    var selectedVal = document.getElementById('search').value;
+    selectedVal = selectedVal.toUpperCase();
+ if (toggle == 0) {
+        //Reduce the opacity of all but the neighbouring nodes
+        var d = "hi";
+        var i = 0;
+        console.log(graph.nodes.length);
+        for(i = 0; i < graph.nodes.length; i++){
+          if(graph.nodes[i].id.toUpperCase() === selectedVal){
+            d = d3.select('#' + graph.nodes[i].id).node().__data__;
+          }
+        }
+        console.log(d);
+        node.style("opacity", function (o) {
+            return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
+        });
+        
+        link.style("opacity", function (o) {
+            return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
+        });
+
+        labels.style("opacity", function (o) {
+            return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
+        });
+        
+        //Reduce the op
+        
+        toggle = 1;
+        
+    } else {
+        //Put them back to opacity=1
+        resetHighlight(e);
         node.style("opacity", 1);
         link.style("opacity", 1);
         labels.style("opacity", 0);
