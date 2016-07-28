@@ -131,7 +131,8 @@ function highlightFeature(e) {
         dashArray: '',
         fillOpacity: 0.7
     });
-    returnNode(layer.feature.properties);
+   var twoLetters = returnNode(layer.feature.properties);
+   connecteddNodes(twoLetters);
 }
 
 returnNode = function (props){
@@ -1118,6 +1119,7 @@ var graph = {
       .attr("r", function(d){
         return 4*d.size;
       })
+      .attr("id", function(d){ return d.id; })
       .attr("fill", function(d) { return color(d.size); })
       .call(d3.drag()
           .on("start", dragstarted)
@@ -1195,34 +1197,6 @@ function neighboring(a, b) {
     return linkedByIndex[a.index + "," + b.index];
 }
 
-function connectedNodes() {
-
-    if (toggle == 0) {
-        //Reduce the opacity of all but the neighbouring nodes
-        d = d3.select(this).node().__data__;
-        node.style("opacity", function (o) {
-            return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
-        });
-        
-        link.style("opacity", function (o) {
-            return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
-        });
-        
-                label.style("opacity", function (o) {
-            return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
-        });
-        //Reduce the op
-        
-        toggle = 1;
-    } else {
-        //Put them back to opacity=1
-        node.style("opacity", 1);
-        link.style("opacity", 1);
-        toggle = 0;
-    }
-
-}
-
 var toggle = 0;
 
 //Create an array logging what is connected to what
@@ -1244,6 +1218,7 @@ function connectedNodes() {
     if (toggle == 0) {
         //Reduce the opacity of all but the neighbouring nodes
         d = d3.select(this).node().__data__;
+        d1 = d3.select(this)
         node.style("opacity", function (o) {
             return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
         });
@@ -1268,12 +1243,22 @@ function connectedNodes() {
     }
 
 }
-/*
-function connectedNodes() {
+
+function connecteddNodes(abbrev) {
 
     if (toggle == 0) {
         //Reduce the opacity of all but the neighbouring nodes
-        d = d3.select(this).node().__data__;
+        var d = "hi";
+        var i = 0;
+        console.log(graph.nodes.length);
+        for(i = 0; i < graph.nodes.length; i++){
+          if(graph.nodes[i].id === abbrev){
+            console.log(abbrev);
+            console.log(graph.nodes[i].id);
+            d = d3.select('#' + graph.nodes[i].id).node().__data__;
+          }
+        }
+        console.log(d);
         node.style("opacity", function (o) {
             return neighboring(d, o) | neighboring(o, d) ? 1 : 0.1;
         });
@@ -1297,6 +1282,6 @@ function connectedNodes() {
         toggle = 0;
     }
 
-}*/
+}
 
 </script>
